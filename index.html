@@ -13,20 +13,24 @@
         body {
             font-family: 'Inter', sans-serif;
         }
-
         .tab-active {
             border-color: #4f46e5;
             color: #4f46e5;
             font-weight: 600;
         }
-
         [v-cloak] {
             display: none;
+        }
+        .fade-enter-active, .fade-leave-active {
+            transition: opacity 0.3s ease;
+        }
+        .fade-enter-from, .fade-leave-to {
+            opacity: 0;
         }
     </style>
 </head>
 
-<body class="antialiased text-gray-800">
+<body class="antialiased text-gray-800 bg-gray-50">
 
     <div id="app" class="container mx-auto p-4 md:p-6 lg:p-8 max-w-7xl">
         <!-- Cabeçalho -->
@@ -39,14 +43,10 @@
         <!-- Abas de Navegação -->
         <div class="mb-6 flex justify-center border-b border-gray-200">
             <nav class="-mb-px flex space-x-6" aria-label="Tabs">
-                <button @click="activeTab = 'reservar'"
-                    :class="{'tab-active': activeTab === 'reservar', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== 'reservar'}"
-                    class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                <button @click="activeTab = 'reservar'" :class="{'tab-active': activeTab === 'reservar', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== 'reservar'}" class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
                     Painel de Reservas
                 </button>
-                <button @click="activeTab = 'gestao'"
-                    :class="{'tab-active': activeTab === 'gestao', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== 'gestao'}"
-                    class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                <button @click="activeTab = 'gestao'" :class="{'tab-active': activeTab === 'gestao', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== 'gestao'}" class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
                     Painel de Gestão
                 </button>
             </nav>
@@ -59,40 +59,30 @@
                 <div class="bg-white p-6 rounded-lg shadow-md border border-gray-100">
                     <h2 class="text-2xl font-semibold mb-2 text-center">Horários Disponíveis</h2>
                     
-                    <!-- Seletor de Data -->
                     <div class="flex flex-col sm:flex-row items-center justify-center gap-2 my-6">
-                        <button @click="changeDate(-1)" class="p-2 rounded-md hover:bg-gray-200 transition-colors">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
-                                <path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/>
-                            </svg>
-                        </button>
+                        <button @click="changeDate(-1)" class="p-2 rounded-md hover:bg-gray-200 transition-colors"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/></svg></button>
                         <input type="date" v-model="selectedDate" class="border-gray-300 rounded-md shadow-sm p-2 text-center">
-                        <button @click="changeDate(1)" class="p-2 rounded-md hover:bg-gray-200 transition-colors">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
-                                <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
-                            </svg>
-                        </button>
-                         <div class="w-14 text-left ml-2"> <!-- Container to prevent layout shift -->
+                        <button @click="changeDate(1)" class="p-2 rounded-md hover:bg-gray-200 transition-colors"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/></svg></button>
+                         <div class="w-14 text-left ml-2"> 
                             <span v-if="isToday" class="text-sm font-semibold text-green-600 animate-pulse">Hoje</span>
                          </div>
                     </div>
 
-                    <div v-if="loading" class="text-center py-8">
-                        <p class="text-gray-500">Carregando horários...</p>
-                    </div>
-
+                    <div v-if="loading" class="text-center py-8"><p class="text-gray-500">Carregando horários...</p></div>
                     <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <div v-for="horario in sortedHorarios" :key="horario.id"
-                            class="p-4 border rounded-lg transition-shadow hover:shadow-lg"
-                            :class="{ 'bg-gray-100': horario.disponiveis === 0, 'bg-green-50': horario.disponiveis > 0 }">
+                        <div v-for="horario in sortedHorarios" :key="horario.id" class="p-4 border rounded-lg transition-shadow hover:shadow-lg" :class="{ 'bg-red-100 border-red-200': horario.bloqueado, 'bg-gray-100': !horario.bloqueado && horario.disponiveis === 0, 'bg-green-50': !horario.bloqueado && horario.disponiveis > 0 }">
                             <h3 class="font-bold text-lg">{{ horario.aula }}ª Aula</h3>
                             <p class="text-gray-600 text-sm">{{ horario.inicio }} - {{ horario.fim }}</p>
                             <div class="mt-3 mb-3">
-                                <span class="font-semibold text-xl">{{ horario.disponiveis }}</span>
-                                <span class="text-gray-600">/ 5 Datashows disponíveis</span>
+                                <template v-if="horario.bloqueado">
+                                    <span class="font-semibold text-xl text-red-600">Bloqueado</span>
+                                </template>
+                                <template v-else>
+                                    <span class="font-semibold text-xl">{{ horario.disponiveis }}</span>
+                                    <span class="text-gray-600">/ {{ horario.total }} Datashows disponíveis</span>
+                                </template>
                             </div>
-                            <button @click="abrirModal(horario)" :disabled="horario.disponiveis === 0"
-                                class="w-full bg-indigo-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-indigo-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors">
+                            <button @click="abrirModal(horario)" :disabled="horario.disponiveis === 0 || horario.bloqueado" class="w-full bg-indigo-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-indigo-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors">
                                 Reservar
                             </button>
                         </div>
@@ -104,63 +94,106 @@
             <section v-if="activeTab === 'gestao'" v-cloak>
                  <div v-if="!adminAutenticado" class="max-w-md mx-auto bg-white p-6 rounded-lg shadow-md border border-gray-100">
                     <h2 class="text-2xl font-semibold mb-4 text-center">Acesso Restrito</h2>
-                    <input type="password" v-model="senhaAdmin" @keyup.enter="autenticarAdmin" placeholder="Digite a senha de gestão"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-md mb-4 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                    <button @click="autenticarAdmin"
-                            class="w-full bg-gray-700 text-white font-semibold py-2 px-4 rounded-md hover:bg-gray-800 transition-colors">
-                        Entrar
-                    </button>
+                    <input type="password" v-model="senhaAdmin" @keyup.enter="autenticarAdmin" placeholder="Digite a senha de gestão" class="w-full px-3 py-2 border border-gray-300 rounded-md mb-4 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <button @click="autenticarAdmin" class="w-full bg-gray-700 text-white font-semibold py-2 px-4 rounded-md hover:bg-gray-800 transition-colors">Entrar</button>
                     <p v-if="erroSenha" class="text-red-500 text-sm text-center mt-2">Senha incorreta.</p>
                 </div>
 
-                <div v-else class="bg-white p-6 rounded-lg shadow-md border border-gray-100">
-                    <h2 class="text-2xl font-semibold mb-4 text-center">Todas as Reservas</h2>
-                     <div v-if="reservas.length === 0" class="text-center text-gray-500 py-6">
-                        Nenhuma reserva foi feita ainda.
+                <div v-else class="space-y-6">
+                    <!-- Módulo de Reservas -->
+                    <div class="bg-white p-6 rounded-lg shadow-md border border-gray-100">
+                        <h2 class="text-2xl font-semibold mb-4 text-center">Gerenciar Reservas</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <input type="date" v-model="filtroData" class="border-gray-300 rounded-md shadow-sm p-2">
+                            <input type="text" v-model="filtroBusca" placeholder="Buscar por professor ou turma..." class="border-gray-300 rounded-md shadow-sm p-2">
+                        </div>
+                        <div v-if="filteredReservas.length === 0" class="text-center text-gray-500 py-6">Nenhuma reserva encontrada para os filtros aplicados.</div>
+                        <ul v-else class="space-y-3 max-h-96 overflow-y-auto pr-2">
+                            <li v-for="reserva in filteredReservas" :key="reserva.id" class="p-4 border rounded-md bg-gray-50 flex justify-between items-center">
+                                <div>
+                                    <p class="font-semibold">{{ reserva.nomeProfessor }}</p>
+                                    <p class="text-sm text-gray-600">{{ getAulaById(reserva.horarioId) }} ({{ reserva.turma }})</p>
+                                    <p class="text-xs text-indigo-600 font-semibold mt-1">{{ formatAdminDate(reserva.date) }}</p>
+                                </div>
+                                <div class="flex space-x-2">
+                                    <button @click="abrirModalEdicao(reserva)" class="bg-blue-500 text-white text-xs font-bold py-1 px-3 rounded-full hover:bg-blue-600 transition-colors">Editar</button>
+                                    <button @click="excluirReserva(reserva.id)" class="bg-red-500 text-white text-xs font-bold py-1 px-3 rounded-full hover:bg-red-600 transition-colors">Excluir</button>
+                                </div>
+                            </li>
+                        </ul>
                     </div>
-                    <ul v-else class="space-y-3">
-                        <li v-for="reserva in sortedReservas" :key="reserva.id" class="p-4 border rounded-md bg-gray-50 flex justify-between items-center">
-                            <div>
-                                <p class="font-semibold">{{ reserva.nomeProfessor }}</p>
-                                <p class="text-sm text-gray-600">{{ getAulaById(reserva.horarioId) }} ({{ reserva.turma }})</p>
-                                <p class="text-xs text-indigo-600 font-semibold mt-1">{{ formatAdminDate(reserva.date) }}</p>
-                            </div>
-                            <button @click="excluirReserva(reserva.id)" class="bg-red-500 text-white text-xs font-bold py-1 px-3 rounded-full hover:bg-red-600 transition-colors">
-                                Excluir
-                            </button>
-                        </li>
-                    </ul>
+                    <!-- Módulo de Disponibilidade -->
+                    <div class="bg-white p-6 rounded-lg shadow-md border border-gray-100">
+                        <h2 class="text-2xl font-semibold mb-4 text-center">Gerenciar Disponibilidade</h2>
+                        <div class="flex items-center justify-center gap-2 my-6">
+                             <input type="date" v-model="gestaoData" class="border-gray-300 rounded-md shadow-sm p-2 text-center">
+                        </div>
+                         <div class="space-y-2">
+                             <div v-for="horario in horariosGestao" :key="horario.id" class="grid grid-cols-4 items-center gap-2 p-2 border rounded-md">
+                                 <div class="col-span-2">
+                                     <p class="font-semibold">{{horario.aula}}ª Aula</p>
+                                     <p class="text-sm text-gray-500">{{horario.inicio}} - {{horario.fim}}</p>
+                                 </div>
+                                 <input type="number" min="0" :max="TOTAL_DATASHOWS" v-model.number="horario.total" @change="salvarDisponibilidade(horario)" class="border-gray-300 rounded-md shadow-sm p-2 w-20" :disabled="horario.bloqueado">
+                                 <button @click="toggleBloqueio(horario)" class="font-semibold py-2 px-3 rounded-md transition-colors text-sm" :class="horario.bloqueado ? 'bg-yellow-500 text-white hover:bg-yellow-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'">
+                                    {{ horario.bloqueado ? 'Desbloquear' : 'Bloquear' }}
+                                 </button>
+                             </div>
+                         </div>
+                    </div>
                 </div>
             </section>
-
         </main>
-
-        <!-- Modal de Reserva -->
-        <div v-if="modalAberto" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
-                <h3 class="text-2xl font-semibold mb-4">Confirmar Reserva</h3>
-                <p class="mb-4">Você está reservando um datashow para a <span class="font-bold">{{ horarioSelecionado.aula }}ª aula ({{ horarioSelecionado.inicio }} - {{ horarioSelecionado.fim }})</span> no dia <span class="font-bold">{{ formatSelectedDate }}</span>.</p>
-                
-                <div class="mb-4">
-                    <label for="nomeProfessor" class="block text-sm font-medium text-gray-700 mb-1">Seu Nome:</label>
-                    <input type="text" id="nomeProfessor" v-model="nomeProfessor" placeholder="Digite seu nome completo"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                </div>
-
-                <div>
-                    <label for="turma" class="block text-sm font-medium text-gray-700 mb-1">Sua Turma:</label>
-                    <input type="text" id="turma" v-model="turma" placeholder="Ex: 1ª série EC"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                </div>
-
-                <p v-if="erroModal" class="text-red-500 text-sm mt-3">{{ erroModal }}</p>
-
-                <div class="mt-6 flex justify-end space-x-3">
-                    <button @click="fecharModal" class="bg-gray-200 text-gray-800 font-semibold py-2 px-4 rounded-md hover:bg-gray-300 transition-colors">Cancelar</button>
-                    <button @click="confirmarReserva" class="bg-indigo-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-indigo-700 transition-colors">Confirmar</button>
+        
+        <!-- Modals -->
+        <transition name="fade">
+            <div v-if="modalAberto" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+                <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+                    <h3 class="text-2xl font-semibold mb-4">Confirmar Reserva</h3>
+                    <p class="mb-4">Você está reservando um datashow para a <span class="font-bold">{{ horarioSelecionado.aula }}ª aula</span> no dia <span class="font-bold">{{ formatSelectedDate }}</span>.</p>
+                    <div class="mb-4">
+                        <label for="nomeProfessor" class="block text-sm font-medium text-gray-700 mb-1">Seu Nome:</label>
+                        <input type="text" id="nomeProfessor" v-model="nomeProfessor" placeholder="Digite seu nome completo" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <div>
+                        <label for="turma" class="block text-sm font-medium text-gray-700 mb-1">Sua Turma:</label>
+                        <select id="turma" v-model="turma" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            <option disabled value="">Selecione uma turma</option>
+                            <option v-for="t in turmas" :key="t" :value="t">{{t}}</option>
+                        </select>
+                    </div>
+                    <p v-if="erroModal" class="text-red-500 text-sm mt-3">{{ erroModal }}</p>
+                    <div class="mt-6 flex justify-end space-x-3">
+                        <button @click="fecharModal" class="bg-gray-200 text-gray-800 font-semibold py-2 px-4 rounded-md hover:bg-gray-300 transition-colors">Cancelar</button>
+                        <button @click="confirmarReserva" class="bg-indigo-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-indigo-700 transition-colors">Confirmar</button>
+                    </div>
                 </div>
             </div>
-        </div>
+        </transition>
+
+        <transition name="fade">
+            <div v-if="modalEdicaoAberto" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+                <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+                    <h3 class="text-2xl font-semibold mb-4">Editar Reserva</h3>
+                    <div class="mb-4">
+                        <label for="editNomeProfessor" class="block text-sm font-medium text-gray-700 mb-1">Nome do Professor:</label>
+                        <input type="text" id="editNomeProfessor" v-model="reservaEmEdicao.nomeProfessor" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                    </div>
+                    <div>
+                        <label for="editTurma" class="block text-sm font-medium text-gray-700 mb-1">Turma:</label>
+                         <select id="editTurma" v-model="reservaEmEdicao.turma" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                            <option v-for="t in turmas" :key="t" :value="t">{{t}}</option>
+                        </select>
+                    </div>
+                    <p v-if="erroModal" class="text-red-500 text-sm mt-3">{{ erroModal }}</p>
+                    <div class="mt-6 flex justify-end space-x-3">
+                        <button @click="fecharModalEdicao" class="bg-gray-200 text-gray-800 font-semibold py-2 px-4 rounded-md hover:bg-gray-300">Cancelar</button>
+                        <button @click="salvarEdicao" class="bg-blue-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-blue-700">Salvar Alterações</button>
+                    </div>
+                </div>
+            </div>
+        </transition>
+
     </div>
     
     <footer class="text-center py-6 mt-8 border-t border-gray-200">
@@ -170,8 +203,9 @@
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getFirestore, collection, onSnapshot, addDoc, deleteDoc, doc, query, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getFirestore, collection, onSnapshot, addDoc, deleteDoc, doc, query, where, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
+        // CONFIGURAÇÕES
         const firebaseConfig = {
             apiKey: "AIzaSyD8DKQpsb9qr8brABwe_ZindCn90u8mERU",
             authDomain: "reservas-datashow-ceglb.firebaseapp.com",
@@ -180,20 +214,22 @@
             messagingSenderId: "232641846615",
             appId: "1:232641846615:web:3ffbea56df8d771c3a7212"
         };
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-
         const TOTAL_DATASHOWS = 5;
         const ADMIN_PASSWORD = "gestao2025";
-
-        const horariosBase = [
-            { id: 1, aula: 1, inicio: '18:00', fim: '18:45' },
-            { id: 2, aula: 2, inicio: '18:45', fim: '19:30' },
-            { id: 3, aula: 3, inicio: '19:45', fim: '20:30' },
-            { id: 4, aula: 4, inicio: '20:30', fim: '21:15' },
-            { id: 5, aula: 5, inicio: '21:15', fim: '22:00' },
-            { id: 6, aula: 6, inicio: '22:00', fim: '22:45' }
+        const turmas = [
+            '1ª Série CM', '1ª Série EC', '1ª Série RR', '1ª Série TB',
+            '2ª Série AR', '2ª Série GR', '2ª Série ML',
+            '3ª Série AS', '3ª Série MA'
         ];
+        const horariosBase = [
+            { id: 1, aula: 1, inicio: '18:00', fim: '18:45' }, { id: 2, aula: 2, inicio: '18:45', fim: '19:30' },
+            { id: 3, aula: 3, inicio: '19:45', fim: '20:30' }, { id: 4, aula: 4, inicio: '20:30', fim: '21:15' },
+            { id: 5, aula: 5, inicio: '21:15', fim: '22:00' }, { id: 6, aula: 6, inicio: '22:00', fim: '22:45' }
+        ];
+
+        // INICIALIZAÇÃO
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
 
         const App = {
             data() {
@@ -203,6 +239,8 @@
                     reservas: [],
                     activeTab: 'reservar',
                     modalAberto: false,
+                    modalEdicaoAberto: false,
+                    reservaEmEdicao: null,
                     horarioSelecionado: null,
                     nomeProfessor: '',
                     turma: '',
@@ -211,158 +249,142 @@
                     senhaAdmin: '',
                     erroSenha: false,
                     selectedDate: new Date().toISOString().split('T')[0],
-                    unsub: null
+                    filtroData: '',
+                    filtroBusca: '',
+                    gestaoData: new Date().toISOString().split('T')[0],
+                    horariosGestao: [],
+                    unsub: null,
+                    unsubAdmin: null,
+                    unsubDisponibilidade: null,
+                    turmas: turmas,
+                    TOTAL_DATASHOWS: TOTAL_DATASHOWS,
                 }
             },
             computed: {
-                sortedHorarios() {
-                    return [...this.horarios].sort((a, b) => a.id - b.id);
-                },
-                sortedReservas() {
-                    return [...this.reservas].sort((a, b) => {
-                        const dateComparison = b.date.localeCompare(a.date);
-                        if (dateComparison !== 0) return dateComparison;
-                        const aulaA = this.getAulaObjById(a.horarioId)?.id || 0;
-                        const aulaB = this.getAulaObjById(b.horarioId)?.id || 0;
-                        return aulaA - aulaB;
+                sortedHorarios() { return [...this.horarios].sort((a, b) => a.id - b.id); },
+                formatSelectedDate() { const [y, m, d] = this.selectedDate.split('-'); return `${d}/${m}/${y}`; },
+                isToday() { return this.selectedDate === new Date().toISOString().split('T')[0]; },
+                filteredReservas() {
+                    return this.reservas.filter(reserva => {
+                        const matchData = !this.filtroData || reserva.date === this.filtroData;
+                        const matchBusca = !this.filtroBusca ||
+                            reserva.nomeProfessor.toLowerCase().includes(this.filtroBusca.toLowerCase()) ||
+                            reserva.turma.toLowerCase().includes(this.filtroBusca.toLowerCase());
+                        return matchData && matchBusca;
+                    }).sort((a, b) => {
+                        const dateComp = b.date.localeCompare(a.date);
+                        if (dateComp !== 0) return dateComp;
+                        return (this.getAulaObjById(a.horarioId)?.id || 0) - (this.getAulaObjById(b.horarioId)?.id || 0);
                     });
-                },
-                formatSelectedDate() {
-                    const [year, month, day] = this.selectedDate.split('-');
-                    return `${day}/${month}/${year}`;
-                },
-                isToday() {
-                    const today = new Date().toISOString().split('T')[0];
-                    return this.selectedDate === today;
                 }
             },
             watch: {
-                selectedDate() {
-                    this.escutarReservas();
-                },
-                activeTab(newTab) {
-                    if (newTab === 'gestao') {
-                        this.escutarTodasReservas();
-                    } else {
-                        this.escutarReservas();
-                    }
-                }
+                selectedDate() { this.escutarDadosViewProfessor(); },
+                activeTab(newTab) { this.limparListeners(); if (newTab === 'gestao') this.escutarDadosViewAdmin(); else this.escutarDadosViewProfessor(); },
+                gestaoData() { this.escutarDisponibilidade(); }
             },
             methods: {
-                escutarReservas() {
-                    this.loading = true;
+                // LÓGICA GERAL
+                limparListeners() {
                     if (this.unsub) this.unsub();
+                    if (this.unsubAdmin) this.unsubAdmin();
+                    if (this.unsubDisponibilidade) this.unsubDisponibilidade();
+                },
+                escutarDadosViewProfessor() {
+                    this.loading = true;
+                    this.limparListeners();
+                    const qReservas = query(collection(db, "reservas"), where("date", "==", this.selectedDate));
+                    const docDisponibilidade = doc(db, "disponibilidade", this.selectedDate);
 
-                    const q = query(collection(db, "reservas"), where("date", "==", this.selectedDate));
-                    
-                    this.unsub = onSnapshot(q, (querySnapshot) => {
-                        const reservasDoDia = [];
-                        querySnapshot.forEach((doc) => {
-                            reservasDoDia.push({ id: doc.id, ...doc.data() });
-                        });
-                        this.atualizarDisponibilidade(reservasDoDia);
-                        this.loading = false;
-                    }, (error) => {
-                        console.error("Erro ao buscar reservas do dia: ", error);
-                        this.loading = false;
+                    let reservasDoDia = [];
+                    let disponibilidadeDoDia = {};
+
+                    this.unsub = onSnapshot(qReservas, (snapshot) => {
+                        reservasDoDia = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+                        this.atualizarDisponibilidade(reservasDoDia, disponibilidadeDoDia);
+                    });
+                    this.unsubDisponibilidade = onSnapshot(docDisponibilidade, (doc) => {
+                        disponibilidadeDoDia = doc.exists() ? doc.data() : {};
+                        this.atualizarDisponibilidade(reservasDoDia, disponibilidadeDoDia);
                     });
                 },
-                escutarTodasReservas() {
-                    this.loading = true;
-                    if (this.unsub) this.unsub();
-                    
+                escutarDadosViewAdmin() {
+                    this.limparListeners();
                     const q = collection(db, "reservas");
-                    this.unsub = onSnapshot(q, (querySnapshot) => {
-                        const todasReservas = [];
-                        querySnapshot.forEach((doc) => {
-                            todasReservas.push({ id: doc.id, ...doc.data() });
-                        });
-                        this.reservas = todasReservas;
-                        this.loading = false;
-                    }, (error) => {
-                        console.error("Erro ao buscar todas as reservas: ", error);
-                        this.loading = false;
+                    this.unsubAdmin = onSnapshot(q, (snapshot) => {
+                        this.reservas = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
                     });
+                    this.escutarDisponibilidade();
                 },
-                atualizarDisponibilidade(reservasDoDia) {
-                    const horariosAtualizados = horariosBase.map(horario => {
-                        const reservasParaHorario = reservasDoDia.filter(r => r.horarioId === horario.id).length;
-                        const disponiveis = TOTAL_DATASHOWS - reservasParaHorario;
-                        return { ...horario, disponiveis };
+                atualizarDisponibilidade(reservasDoDia, disponibilidadeDoDia) {
+                    this.horarios = horariosBase.map(horario => {
+                        const config = disponibilidadeDoDia[horario.id] || {};
+                        const total = config.total !== undefined ? config.total : TOTAL_DATASHOWS;
+                        const bloqueado = config.bloqueado || false;
+                        const reservados = reservasDoDia.filter(r => r.horarioId === horario.id).length;
+                        return { ...horario, total, bloqueado, disponiveis: Math.max(0, total - reservados) };
                     });
-                    this.horarios = horariosAtualizados;
+                    this.loading = false;
                 },
-                abrirModal(horario) {
-                    this.horarioSelecionado = horario;
-                    this.modalAberto = true;
-                    this.erroModal = '';
-                    this.nomeProfessor = '';
-                    this.turma = '';
-                },
-                fecharModal() {
-                    this.modalAberto = false;
-                    this.horarioSelecionado = null;
-                },
+                
+                // LÓGICA PROFESSOR
+                abrirModal(horario) { this.horarioSelecionado = horario; this.modalAberto = true; this.erroModal = ''; this.nomeProfessor = ''; this.turma = ''; },
+                fecharModal() { this.modalAberto = false; },
                 async confirmarReserva() {
-                    if (!this.nomeProfessor.trim() || !this.turma.trim()) {
-                        this.erroModal = 'Por favor, preencha seu nome e sua turma.';
-                        return;
-                    }
-
+                    if (!this.nomeProfessor.trim() || !this.turma) { this.erroModal = 'Por favor, preencha seu nome e selecione sua turma.'; return; }
                     try {
-                        await addDoc(collection(db, "reservas"), {
-                            date: this.selectedDate,
-                            horarioId: this.horarioSelecionado.id,
-                            nomeProfessor: this.nomeProfessor.trim(),
-                            turma: this.turma.trim(),
-                            timestamp: new Date()
-                        });
+                        await addDoc(collection(db, "reservas"), { date: this.selectedDate, horarioId: this.horarioSelecionado.id, nomeProfessor: this.nomeProfessor.trim(), turma: this.turma, timestamp: new Date() });
                         this.fecharModal();
-                    } catch (error) {
-                        console.error("Erro ao adicionar reserva: ", error);
-                        this.erroModal = 'Ocorreu um erro ao salvar sua reserva. Tente novamente.';
-                    }
+                    } catch (e) { this.erroModal = 'Ocorreu um erro ao salvar. Tente novamente.'; }
                 },
-                 getAulaObjById(id) {
-                    return horariosBase.find(h => h.id === id);
+                changeDate(days) { const d = new Date(this.selectedDate + 'T00:00:00'); d.setDate(d.getDate() + days); this.selectedDate = d.toISOString().split('T')[0]; },
+                
+                // LÓGICA GESTÃO
+                autenticarAdmin() { if (this.senhaAdmin === ADMIN_PASSWORD) { this.adminAutenticado = true; this.erroSenha = false; } else { this.erroSenha = true; } this.senhaAdmin = ''; },
+                async excluirReserva(id) { if (confirm('Tem certeza que deseja excluir esta reserva?')) await deleteDoc(doc(db, "reservas", id)); },
+                abrirModalEdicao(reserva) { this.reservaEmEdicao = { ...reserva }; this.modalEdicaoAberto = true; this.erroModal = ''; },
+                fecharModalEdicao() { this.modalEdicaoAberto = false; },
+                async salvarEdicao() {
+                    if (!this.reservaEmEdicao.nomeProfessor.trim() || !this.reservaEmEdicao.turma) { this.erroModal = 'Preencha todos os campos.'; return; }
+                    const { id, ...data } = this.reservaEmEdicao;
+                    await updateDoc(doc(db, "reservas", id), data);
+                    this.fecharModalEdicao();
                 },
-                getAulaById(id) {
-                    const horario = this.getAulaObjById(id);
-                    return horario ? `${horario.aula}ª Aula` : 'Desconhecida';
+                escutarDisponibilidade() {
+                    if (this.unsubDisponibilidade) this.unsubDisponibilidade();
+                    const docRef = doc(db, "disponibilidade", this.gestaoData);
+                    this.unsubDisponibilidade = onSnapshot(docRef, (doc) => {
+                        const data = doc.exists() ? doc.data() : {};
+                        this.horariosGestao = horariosBase.map(h => {
+                            const config = data[h.id] || {};
+                            return { ...h, total: config.total !== undefined ? config.total : TOTAL_DATASHOWS, bloqueado: config.bloqueado || false };
+                        });
+                    });
                 },
-                 formatAdminDate(dateString) {
-                    const [year, month, day] = dateString.split('-');
-                    return `${day}/${month}/${year}`;
+                async salvarDisponibilidade(horario) {
+                    const docRef = doc(db, "disponibilidade", this.gestaoData);
+                    const docSnap = await getDoc(docRef);
+                    const data = docSnap.exists() ? docSnap.data() : {};
+                    data[horario.id] = { total: horario.total, bloqueado: horario.bloqueado };
+                    await setDoc(docRef, data, { merge: true });
                 },
-                async excluirReserva(reservaId) {
-                    try {
-                        await deleteDoc(doc(db, "reservas", reservaId));
-                    } catch (error) {
-                        console.error("Erro ao excluir reserva: ", error);
-                    }
+                async toggleBloqueio(horario) {
+                    horario.bloqueado = !horario.bloqueado;
+                    await this.salvarDisponibilidade(horario);
                 },
-                autenticarAdmin() {
-                   if (this.senhaAdmin === ADMIN_PASSWORD) {
-                       this.adminAutenticado = true;
-                       this.erroSenha = false;
-                   } else {
-                       this.erroSenha = true;
-                   }
-                   this.senhaAdmin = '';
-                },
-                changeDate(days) {
-                    const currentDate = new Date(this.selectedDate + 'T00:00:00');
-                    currentDate.setDate(currentDate.getDate() + days);
-                    this.selectedDate = currentDate.toISOString().split('T')[0];
-                }
+
+                // HELPERS
+                getAulaObjById(id) { return horariosBase.find(h => h.id === id); },
+                getAulaById(id) { const h = this.getAulaObjById(id); return h ? `${h.aula}ª Aula` : 'Desconhecida'; },
+                formatAdminDate(d) { const [y, m, day] = d.split('-'); return `${day}/${m}/${y}`; },
             },
             mounted() {
-                this.escutarReservas();
+                this.escutarDadosViewProfessor();
             }
         }
 
         Vue.createApp(App).mount('#app');
     </script>
 </body>
-
 </html>
+
