@@ -184,7 +184,7 @@
         </transition>
 
         <transition name="fade">
-            <div v-if="modalEdicaoAberto && reservaEmEdicao" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div v-if="modalEdicaoAberto" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
                 <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
                     <h3 class="text-2xl font-semibold mb-4">Editar Reserva</h3>
                     <div class="mb-4">
@@ -247,7 +247,7 @@
             data() {
                 return {
                     loading: true, horarios: [], reservas: [], activeTab: 'reservar',
-                    modalAberto: false, modalEdicaoAberto: false, reservaSucesso: false,
+                    modalAberto: false, reservaSucesso: false,
                     reservaEmEdicao: null, horarioSelecionado: null, nomeProfessor: '', turma: '', erroModal: '',
                     adminAutenticado: false, senhaAdmin: '', erroSenha: false,
                     selectedDate: new Date().toISOString().split('T')[0],
@@ -257,6 +257,9 @@
                 }
             },
             computed: {
+                modalEdicaoAberto() {
+                    return this.reservaEmEdicao !== null;
+                },
                 sortedHorarios() { return [...this.horarios].sort((a, b) => a.id - b.id); },
                 formatSelectedDate() { const [y, m, d] = this.selectedDate.split('-'); return `${d}/${m}/${y}`; },
                 isToday() { return this.selectedDate === new Date().toISOString().split('T')[0]; },
@@ -327,11 +330,15 @@
                 changeDate(days) { const d = new Date(this.selectedDate + 'T00:00:00'); d.setDate(d.getDate() + days); this.selectedDate = d.toISOString().split('T')[0]; },
                 autenticarAdmin() { if (this.senhaAdmin === ADMIN_PASSWORD) { this.adminAutenticado = true; this.erroSenha = false; } else { this.erroSenha = true; } this.senhaAdmin = ''; },
                 async excluirReserva(id) {
-                    // Correção: Removido o 'confirm()' que não funciona no ambiente. A exclusão agora é imediata.
                     await deleteDoc(doc(db, "reservas", id));
                 },
-                abrirModalEdicao(reserva) { this.reservaEmEdicao = { ...reserva }; this.modalEdicaoAberto = true; this.erroModal = ''; },
-                fecharModalEdicao() { this.modalEdicaoAberto = false; },
+                abrirModalEdicao(reserva) {
+                    this.reservaEmEdicao = { ...reserva };
+                    this.erroModal = '';
+                },
+                fecharModalEdicao() {
+                    this.reservaEmEdicao = null;
+                },
                 async salvarEdicao() {
                     if (!this.reservaEmEdicao.nomeProfessor.trim() || !this.reservaEmEdicao.turma) { this.erroModal = 'Preencha todos os campos.'; return; }
                     const { id, ...data } = this.reservaEmEdicao;
