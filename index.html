@@ -12,7 +12,6 @@
     <style>
         body { font-family: 'Inter', sans-serif; }
         .tab-active { border-color: #4f46e5; color: #4f46e5; font-weight: 600; }
-        /* 🔒 Garante que nada com v-cloak apareça antes do Vue montar */
         [v-cloak] { display: none !important; }
         .fade-enter-active, .fade-leave-active { transition: opacity 0.3s ease; }
         .fade-enter-from, .fade-leave-to { opacity: 0; }
@@ -21,7 +20,6 @@
 
 <body class="antialiased text-gray-800 bg-gray-50">
 
-    <!-- ✅ v-cloak no root evita FOUC (flash) em qualquer conteúdo, inclusive modais -->
     <div id="app" v-cloak class="container mx-auto p-4 md:p-6 lg:p-8 max-w-7xl">
         <!-- Cabeçalho -->
         <header class="text-center mb-8">
@@ -49,13 +47,26 @@
                 <div class="bg-white p-6 rounded-lg shadow-md border border-gray-100">
                     <h2 class="text-2xl font-semibold mb-2 text-center">Horários Disponíveis</h2>
                     
-                    <div class="flex flex-col sm:flex-row items-center justify-center gap-2 my-6">
-                        <button @click="changeDate(-1)" :disabled="selectedDate <= semanaInicio" class="p-2 rounded-md hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/></svg></button>
-                        <input type="date" v-model="selectedDate" :min="semanaInicio" :max="semanaFim" class="border-gray-300 rounded-md shadow-sm p-2 text-center">
-                        <button @click="changeDate(1)" :disabled="selectedDate >= semanaFim" class="p-2 rounded-md hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/></svg></button>
-                         <div class="w-14 text-left ml-2"> 
+                    <!-- Layout adaptativo: celular e desktop -->
+                    <div class="flex flex-col items-center gap-2 my-6 sm:flex-row sm:justify-center">
+                        <!-- Ícone de calendário visível apenas no celular -->
+                        <div class="sm:hidden flex justify-center mb-1 text-indigo-600" aria-hidden="true">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M7 2v2H5a2 2 0 0 0-2 2v2h18V6a2 2 0 0 0-2-2h-2V2h-2v2H9V2H7zm13 8H4v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V10z"/></svg>
+                        </div>
+
+                        <button @click="changeDate(-1)" :disabled="selectedDate <= semanaInicio" class="p-2 rounded-md hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors order-1 sm:order-none">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/></svg>
+                        </button>
+
+                        <input type="date" v-model="selectedDate" :min="semanaInicio" :max="semanaFim" class="border-gray-300 rounded-md shadow-sm p-2 text-center" />
+
+                        <button @click="changeDate(1)" :disabled="selectedDate >= semanaFim" class="p-2 rounded-md hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors order-2 sm:order-none">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/></svg>
+                        </button>
+
+                        <div class="w-full text-center sm:w-auto sm:text-left ml-0 sm:ml-2"> 
                             <span v-if="isToday" class="text-sm font-semibold text-green-600 animate-pulse">Hoje</span>
-                         </div>
+                        </div>
                     </div>
 
                     <div v-if="loading" class="text-center py-8"><p class="text-gray-500">Carregando horários...</p></div>
@@ -136,7 +147,6 @@
         </main>
         
         <!-- Modals -->
-        <!-- ✅ v-cloak também aqui: evita flash dos modais antes do Vue controlar v-if -->
         <transition name="fade">
             <div v-cloak v-if="modalAberto" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" aria-hidden="true">
                 <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
@@ -200,7 +210,7 @@
     </div>
     
     <footer class="text-center py-6 mt-8 border-t border-gray-200">
-        <p class="text-sm text-gray-500">Criado por Robison Sá. Copyright 2025. Todos os Direitos Reservados. (v2.8 - Fix flash modal)</p>
+        <p class="text-sm text-gray-500">Criado por Robison Sá. Copyright 2025. Todos os Direitos Reservados. (v2.8 - Fix flash modal + mobile date UI)</p>
     </footer>
 
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
