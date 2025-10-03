@@ -176,8 +176,8 @@
                        @change="salvarDisponibilidade(horario)"
                        class="border-gray-300 rounded-md shadow-sm p-2 w-20" :disabled="horario.bloqueado"/>
                 <button @click="toggleBloqueio(horario)"
-                        class="font-semibold py-2 px-3 rounded-md transition-colors text-sm"
-                        :class="horario.bloqueado ? 'bg-yellow-500 text-white hover:bg-yellow-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'">
+                         class="font-semibold py-2 px-3 rounded-md transition-colors text-sm"
+                         :class="horario.bloqueado ? 'bg-yellow-500 text-white hover:bg-yellow-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'">
                   {{ horario.bloqueado ? 'Desbloquear' : 'Bloquear' }}
                 </button>
               </div>
@@ -259,12 +259,13 @@
   </div>
 
   <footer class="text-center py-6 mt-8 border-t border-gray-200">
-    <p class="text-sm text-gray-500">Criado por Robison Sá. Copyright 2025. Todos os Direitos Reservados. </p>
+    <p class="text-sm text-gray-500">Criado por Robison Sá. Copyright 2025. Todos os Direitos Reservados.</p>
   </footer>
 
   <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     import { getFirestore, collection, onSnapshot, addDoc, deleteDoc, doc, query, where, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
     // CONFIG
@@ -294,6 +295,7 @@
 
     // INICIALIZAÇÃO
     const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
     const db = getFirestore(app);
 
     const App = {
@@ -446,12 +448,19 @@
         getAulaById(id){ const h = this.getAulaObjById(id); return h ? `${h.aula}ª Aula` : 'Desconhecida'; },
         formatAdminDate(d){ const [y,m,day] = d.split('-'); return `${day}/${m}/${y}`; },
       },
-      mounted(){ this.escutarDadosViewProfessor(); }
+      async mounted(){
+        try {
+          await signInAnonymously(auth);
+          this.escutarDadosViewProfessor();
+        } catch (error) {
+          console.error("Erro na autenticação anônima:", error);
+          this.loading = false; // Garante que a tela não fique travada em "Carregando"
+        }
+      }
     };
 
     Vue.createApp(App).mount('#app');
   </script>
 </body>
 </html>
-
 
